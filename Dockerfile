@@ -38,16 +38,22 @@ RUN ["mv", "wkhtmltopdf-i386", "/usr/local/bin/wkhtmltopdf"]
 # Install rbenv and ruby-build
 WORKDIR /home/$AUTOCARGO_USER/
 USER $AUTOCARGO_USER
-RUN git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
-RUN git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-RUN .rbenv/plugins/ruby-build/install.sh
+RUN git clone https://github.com/sstephenson/rbenv.git /home/$AUTOCARGO_USER/.rbenv
+RUN git clone https://github.com/sstephenson/ruby-build.git /home/$AUTOCARGO_USER/.rbenv/plugins/ruby-build
+
+#USER root
+#RUN .rbenv/plugins/ruby-build/install.sh
+#RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
+
+# TODO: Export PATH as $AUTOCARGO_USER
+# export PATH="$HOME/.rbenv/bin:$PATH"
+USER $AUTOCARGO_USER
 ENV PATH /home/$AUTOCARGO_USER/.rbenv/bin:$PATH
-RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
 RUN echo 'eval "$(rbenv init -)"' >> .bashrc
 
 # Install ruby 2.1.5
 ENV CONFIGURE_OPTS --disable-install-doc
-ENV RUBY_BUILD_CACHE_PATH ~/.rbenv/cache/
+ENV RUBY_BUILD_CACHE_PATH /home/$AUTOCARGO_USER/.rbenv/cache/
 RUN mkdir -p $RUBY_BUILD_CACHE_PATH
 COPY packages/ruby/ruby-2.1.5.tar.bz2 $RUBY_BUILD_CACHE_PATH
 RUN rbenv install 2.1.5
