@@ -1,21 +1,23 @@
 # Version: 0.0.1
 FROM ubuntu:xenial
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 MAINTAINER Celtec Tecnologia e Serviços "@celtec_tech"
 
 ENV AUTOCARGO_USER autocargo
 ENV AUTOCARGO_GROUP app
+ENV AUTOCARGO_USER_HOME /home/$AUTOCARGO_USER
 
 # Create autocargo user in Ubuntu
 RUN groupadd $AUTOCARGO_GROUP
 RUN useradd -r $AUTOCARGO_USER -g $AUTOCARGO_GROUP
-RUN mkdir -p /home/$AUTOCARGO_USER
-RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R /home/$AUTOCARGO_USER
+RUN mkdir -p $AUTOCARGO_USER_HOME
+RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R $AUTOCARGO_USER_HOME
 
 # Install dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential curl git
-RUN apt-get install -y python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev libreadline6-dev
+RUN apt-get install -y python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev libreadline6-dev vim
 RUN apt-get clean
 
 # Build node-v0.4.9
@@ -36,39 +38,39 @@ WORKDIR /usr/local/src/
 RUN ["mv", "wkhtmltopdf-i386", "/usr/local/bin/wkhtmltopdf"]
 
 # Install rbenv and ruby-build
-WORKDIR /home/$AUTOCARGO_USER/
+WORKDIR $AUTOCARGO_USER_HOME
 USER $AUTOCARGO_USER
-RUN git clone https://github.com/sstephenson/rbenv.git /home/$AUTOCARGO_USER/.rbenv
-RUN git clone https://github.com/sstephenson/ruby-build.git /home/$AUTOCARGO_USER/.rbenv/plugins/ruby-build
+ENV AUTOCARGO_RBENV_PATH $AUTOCARGO_USER_HOME/.rbenv
+RUN git clone https://github.com/sstephenson/rbenv.git $AUTOCARGO_RBENV_PATH
+RUN git clone https://github.com/sstephenson/ruby-build.git $AUTOCARGO_RBENV_PATH/plugins/ruby-build
 
-#USER root
-#RUN .rbenv/plugins/ruby-build/install.sh
-#RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
-
-# TODO: Export PATH as $AUTOCARGO_USER
-# export PATH="$HOME/.rbenv/bin:$PATH"
 USER $AUTOCARGO_USER
-ENV PATH /home/$AUTOCARGO_USER/.rbenv/bin:$PATH
-RUN echo 'eval "$(rbenv init -)"' >> .bashrc
+ENV PATH $AUTOCARGO_RBENV_PATH/bin:$AUTOCARGO_RBENV_PATH/shims:$PATH
+COPY files/.bashrc $AUTOCARGO_USER_HOME/.bashrc
 
 # Install ruby 2.1.5
 ENV CONFIGURE_OPTS --disable-install-doc
-ENV RUBY_BUILD_CACHE_PATH /home/$AUTOCARGO_USER/.rbenv/cache/
+ENV RUBY_BUILD_CACHE_PATH $AUTOCARGO_RBENV_PATH/cache/
 RUN mkdir -p $RUBY_BUILD_CACHE_PATH
 COPY packages/ruby/ruby-2.1.5.tar.bz2 $RUBY_BUILD_CACHE_PATH
-RUN rbenv install 2.1.5
-RUN rbenv global 2.1.5
+ENV RUBYGEMS_VERSION 2.1.5
+RUN rbenv install $RUBYGEMS_VERSION
+RUN rbenv global $RUBYGEMS_VERSION
 RUN rbenv rehash
+
+# Update RubyGems
+USER $AUTOCARGO_USER
+COPY files/.gemrc $AUTOCARGO_USER_HOME/.gemrc
+ENV AUTOCARGO_RBENV_SHIMS_PATH $AUTOCARGO_RBENV_PATH/shims
+RUN gem update --system $RUBYGEMS_VERSION
+
+## Install Bundler
+#RUN echo $(`ls -lha ./`)
+RUN gem install bundler
 
 # Create apps directories
 USER root
 RUN mkdir -p /opt/apps
 RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP /opt/apps
 
-# Update RubyGems
 USER $AUTOCARGO_USER
-echo 'gem: --no-rdoc --no-ri' >> /.gemrc
-gem update --system
-
-## Install Bundler
-RUN gem install bundler
