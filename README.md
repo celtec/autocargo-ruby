@@ -5,4 +5,5 @@ Docker Image Autocargo Ruby
 
 ```
 docker build -t="celtec/autocargo-ruby" .
+docker run -i -t celtec/autocargo-ruby /bin/bash
 ```
