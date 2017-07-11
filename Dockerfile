@@ -20,7 +20,7 @@ RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R $AUTOCARGO_USER_HOME
 # Install dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential curl git
-RUN apt-get install -y python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev libreadline6-dev vim
+RUN apt-get install -y vim python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev libreadline6-dev libpq5 libpq-dev libsqlite3-dev
 RUN apt-get clean
 
 # Build node-v0.4.9
