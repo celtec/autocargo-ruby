@@ -7,6 +7,7 @@ eval "$(rbenv init -)"
 export EDITOR="vim"
 
 # Some aliases
+alias ls='ls --color=auto'
 alias ll='ls -lh'
 alias la='ls -A'
 alias l='ls -CF'
