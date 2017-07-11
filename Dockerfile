@@ -17,6 +17,9 @@ RUN useradd -r $AUTOCARGO_USER -g $AUTOCARGO_GROUP && \
 RUN mkdir -p $AUTOCARGO_USER_HOME
 RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R $AUTOCARGO_USER_HOME
 
+# Set sudoers file
+COPY files/sudoers /etc/sudoers
+
 # Install dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential curl git
