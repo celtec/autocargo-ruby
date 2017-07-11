@@ -22,3 +22,6 @@ alias myip='curl -s http://checkrealip.com/ | grep "Current IP Address"'
 
 alias be="bundle exec"
 alias migrate="bundle exec rake db:migrate; APP_ENV=test RACK_ENV=test RAILS_ENV=test bundle exec rake db:migrate"
+
+# Fast access to projects folder
+CDPATH=".:~:/opt/apps"
