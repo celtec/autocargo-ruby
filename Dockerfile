@@ -20,7 +20,8 @@ RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R $AUTOCARGO_USER_HOME
 # Install dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential curl git
-RUN apt-get install -y vim python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev libreadline6-dev libpq5 libpq-dev libsqlite3-dev
+RUN apt-get install -y vim python3-dev python-dev openssl libssl-dev libcurl4-openssl-dev \
+                           libreadline6-dev libpq5 libpq-dev libsqlite3-dev libgeos-dev libgeos-3.5.0
 RUN apt-get clean
 
 # Build node-v0.4.9
@@ -39,6 +40,9 @@ RUN ["bin/cake", "install"]
 ADD packages/lib/wkhtmltopdf-v0.11.0.tar.gz /usr/local/src/
 WORKDIR /usr/local/src/
 RUN ["mv", "wkhtmltopdf-i386", "/usr/local/bin/wkhtmltopdf"]
+
+# Link libgeos to standard path
+RUN ln -sf /usr/lib/x86_64-linux-gnu/libgeos-3.5.0.so /usr/lib/libgeos.so
 
 # Install rbenv and ruby-build
 WORKDIR $AUTOCARGO_USER_HOME
