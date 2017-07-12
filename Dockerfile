@@ -16,9 +16,7 @@ RUN useradd -r $AUTOCARGO_USER -g $AUTOCARGO_GROUP && \
   adduser $AUTOCARGO_USER sudo
 RUN mkdir -p $AUTOCARGO_USER_HOME
 RUN chown $AUTOCARGO_USER:$AUTOCARGO_GROUP -R $AUTOCARGO_USER_HOME
-
-# Set sudoers file
-COPY files/sudoers /etc/sudoers
+RUN passwd -d root
 
 # Install dependencies
 RUN apt-get update
